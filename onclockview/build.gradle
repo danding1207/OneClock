@@ -1,0 +1,125 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.jfrog.bintray'
+version = "0.0.1"   //这个是你上传到bintray仓库的版本号，以后更新就改这个
+
+android {
+    compileSdkVersion 25
+    buildToolsVersion "25.0.0"
+
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 25
+        versionCode 1
+        versionName "0.0.1"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    compile 'com.android.support:appcompat-v7:25.0.1'
+    /** nineoldandroids       */
+    compile 'com.nineoldandroids:library:2.4.0'
+
+    /** android.support.constraint               */
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
+
+    compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
+    compile 'io.reactivex.rxjava2:rxjava:2.1.0'
+
+    compile "org.jetbrains.kotlin:kotlin-stdlib:1.0.4"
+
+}
+
+
+def siteUrl = 'https://github.com/yourname/myfirstlibrary'    //Homepage URL of the library  重要，最好在github上也同步了工程
+def gitUrl = 'https://github.com/yourname/myfirstlibrary.git'    //Git repository url重要
+def issueUrl = 'https://github.com/yourname/myfirstlibrary/issues'    //issue url of the library重要
+group = "com.github.yourname"    //这个gruop很重要，参考 compile 'groupId:artifactId:version'     groupId就是这个，artifactId就是包名，version就是顶部那个
+install {
+    repositories.mavenInstaller {
+        // This generates POM.xml with proper parameters
+        pom {
+            project {
+                packaging 'aar'
+                // Add your description here
+                name '翻页时钟效果'
+                url siteUrl
+                // Set your license
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id 'danding1207' //your user ID 不重要
+                        name 'danding1207' //your name 不重要
+                        email 'dandning1207@gmail.com' //your email 不重要
+                    }
+                }
+                scm {
+                    connection gitUrl
+                    developerConnection gitUrl
+                    url siteUrl
+                }
+            }
+        }
+    }
+}
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+bintray {
+    user = properties.getProperty("bintray.user")
+    key = properties.getProperty("bintray.apikey")
+    configurations = ['archives']
+    pkg {
+        repo = "android"    //发布到Bintray的哪个仓库，这个就是第一步时你在bintray网站建立的仓库名，若这仓库不存在，则会报错
+        name = "myfirstlibrary"    //发布到Bintray上的名字，这个是显示在bintray仓库中的项目名字，与包名可同可不同，若仓库没有这个项目文件夹，则会自动创建
+        desc = "a library to test."    //项目描述
+        websiteUrl = siteUrl
+        vcsUrl = gitUrl
+        issueTrackerUrl = issueUrl
+        licenses = ["Apache-2.0"]
+        labels = ['android']    //标签
+        publish = true
+        publicDownloadNumbers = true
+    }
+    javadoc { //jav doc采用utf-8编码否则会报“GBK的不可映射字符”错误
+        options {
+            encoding "UTF-8"
+            charSet 'UTF-8'
+        }
+    }
+}
