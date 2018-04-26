@@ -81,10 +81,13 @@ class OneClockView : LinearLayout {
                 .inflate(R.layout.layout_one_clock, this, true)
         setCameraDistance()
 
-        mDisposable = Observable.interval(1, TimeUnit.SECONDS)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { onTimeChanged() }
+        if(!isInEditMode){
+            //预览
+            mDisposable = Observable.interval(1, TimeUnit.SECONDS)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe { onTimeChanged() }
+        }
     }
 
     override fun onDetachedFromWindow() {

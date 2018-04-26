@@ -1,1 +1,1 @@
-include ':app', ':onclockview'
+include ':app', ':oneclockview'
