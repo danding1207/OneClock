@@ -46,6 +46,7 @@ class OneClockView : LinearLayout {
         initCustomAttrs(context, attrs)
     }
 
+    private var isLoged: Boolean = false
     private var isRotation: Boolean = false
     private var hour_text_color: Int = 0
     private var minute_text_color: Int = 0
@@ -81,12 +82,24 @@ class OneClockView : LinearLayout {
                 .inflate(R.layout.layout_one_clock, this, true)
         setCameraDistance()
 
-        if(!isInEditMode){
+        if (!isInEditMode) {
             //预览
-            mDisposable = Observable.interval(1, TimeUnit.SECONDS)
+
+            val calendar = Calendar.getInstance()
+            //秒
+            val second = calendar.get(Calendar.SECOND)
+            val milliSecond = calendar.get(Calendar.MILLISECOND)
+
+           if(isLoged) Log.e("OneClockView", "second: " + second + "  milliSecond: " + milliSecond)
+            Observable.timer(milliSecond.toLong(), TimeUnit.MILLISECONDS)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe { onTimeChanged() }
+                    .subscribe {
+                        mDisposable = Observable.interval(1, TimeUnit.SECONDS)
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe { onTimeChanged() }
+                    }
         }
     }
 
@@ -140,12 +153,14 @@ class OneClockView : LinearLayout {
      * @param second
      */
     private fun setClock(hour: Int, minute: Int, second: Int) {
+        if(isLoged) Log.e("OneClockView", "setClock")
+
         if (hour != hourTemp) {
             hourTemp = hour
-            if (hour < 10) {
-                hourString = "0" + hour
+            hourString = if (hour < 10) {
+                "0" + hour
             } else {
-                hourString = "" + hour
+                "" + hour
             }
             tv_hour_top!!.text = hourString
             tv_hour_bottom!!.text = hourString
@@ -153,10 +168,10 @@ class OneClockView : LinearLayout {
 
         if (minute != minuteTemp) {
             minuteTemp = minute
-            if (minute < 10) {
-                minuteString = "0" + minute
+            minuteString = if (minute < 10) {
+                "0" + minute
             } else {
-                minuteString = "" + minute
+                "" + minute
             }
             tv_min_top!!.text = minuteString
             tv_min_bottom!!.text = minuteString
@@ -165,10 +180,10 @@ class OneClockView : LinearLayout {
 
         if (second != secondTemp) {
             secondTemp = second
-            if (second < 10) {
-                secondString = "0" + second
+            secondString = if (second < 10) {
+                "0" + second
             } else {
-                secondString = "" + second
+                "" + second
             }
             tv_second!!.text = secondString
         }
@@ -197,10 +212,10 @@ class OneClockView : LinearLayout {
                 minuteString = "0" + minute
                 minuteStringNext = "00"
 
-                if (hour < 23) {
-                    hourStringNext = "" + (hour + 1)
+                hourStringNext = if (hour < 23) {
+                    "" + (hour + 1)
                 } else {
-                    hourStringNext = "00"
+                    "00"
                 }
 
                 tv_hour_top_b!!.text = hourString
